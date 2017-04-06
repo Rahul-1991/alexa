@@ -36,6 +36,8 @@ def birthday_today_list(calender_info):
 def retrieve_today_birthday():
     calender_info = GoogleCalenderWrapper().get_event_summary()
     today_birthday_list = birthday_today_list(calender_info)
+    if not today_birthday_list:
+        return statement('Sir there are no birthdays for today')
     birthday_speech = 'Sir i have found the following people who have birthday today. '
     for event in today_birthday_list:
         birthday_speech += event + '. '

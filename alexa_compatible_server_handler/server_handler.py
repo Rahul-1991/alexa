@@ -1,12 +1,14 @@
 from flask import Flask
 from flask_ask import Ask, statement, question, session
-from aws_handler import EC2Manager
+from aws_handler import EC2Manager, RDSManager
 
 app = Flask(__name__)
 ask = Ask(app, "/")
 
 ec2_manager = EC2Manager()
+rds_manager = RDSManager()
 server_name_list = ec2_manager.get_all_server_names()
+rds_names_list = rds_manager.get_rds_names()
 
 
 @ask.launch
@@ -23,6 +25,7 @@ def list_servers():
 
 @ask.intent('CountIntent')
 def count_active_servers():
+    print "hello world"
     return question('There are currently %s active servers.' % ec2_manager.get_active_instance_count())
 
 
@@ -33,12 +36,40 @@ def list_active_servers():
 
 @ask.intent('StartServerIntent', mapping={'server_name': 'server_name'})
 def start_server(server_name):
-    server_name = server_name.lower()
+    if server_name:
+        server_name = server_name.lower()
     if server_name not in server_name_list:
         return question('%s is not available. Please try once more' % server_name)
     else:
         ec2_manager.start_server(server_name)
         return question('%s server is ready to serve' % server_name)
+
+
+@ask.intent('StopServerIntent', mapping={'server_name': 'server_name'})
+def stop_server(server_name):
+    if server_name:
+        server_name = server_name.lower()
+    if server_name not in server_name_list:
+        return question('%s is not available. Please try once more' % server_name)
+    else:
+        ec2_manager.stop_server(server_name)
+        return question('%s server has stopped' % server_name)
+
+
+@ask.intent('ListRDSIntent')
+def list_rds_instances():
+    return question('Following are the names of active servers. %s. Would you like to do something else ?'
+                    % '\n'.join(rds_names_list))
+
+
+@ask.intent('CreateRDSInstance', mapping={'rds_name': 'rds_name'})
+def create_rds_instance(rds_name):
+    if rds_name:
+        rds_name = rds_name.lower()
+    if rds_name not in rds_names_list:
+        return question('%s is not available. Please try once more' % rds_name)
+    else:
+        return question('Snapshot for %s is created' % rds_name)
 
 
 @ask.intent('AMAZON.CancelIntent')

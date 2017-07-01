@@ -1,0 +1,8 @@
+{
+    "dev": {
+        "app_function": "alexa_github.app", 
+        "aws_region": "us-east-1", 
+        "profile_name": "default", 
+        "s3_bucket": "zappa-1mm8u48up"
+    }
+}
